@@ -32,5 +32,5 @@ class Car(Base):
                      "model" : self.model,
                      "year" : self.year,
                      "price" : self.price }
-
+        # changed this file
         return new_dict
