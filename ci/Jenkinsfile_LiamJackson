@@ -1,0 +1,20 @@
+pipeline {
+	stages {
+		stage('Setup') {
+			steps {
+				script {
+					sh 'python3 -m venv venv'
+					sh 'venv/bin/pip install coverage'
+				}
+			}
+		}
+		stage ('Display') {
+			steps {
+				script {
+					echo "Liam Jackson Group 24"
+					echo "Running ${env.BUILD_ID} with workspace ${env.WORKSPACE}"
+				}
+			}
+		}
+	}
+}
