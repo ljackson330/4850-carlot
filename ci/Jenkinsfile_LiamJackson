@@ -1,5 +1,5 @@
 pipeline {
-	agent any
+	agent 'agentnew'
 	stages {
 		stage('Setup') {
 			steps {
@@ -17,5 +17,38 @@ pipeline {
 				}
 			}
 		}
+		stage ('Loop') {
+			steps {
+				def files = findFiles(glob: '*.py')
+				for (file in files) {
+					print(f"{file} is a Python file in the CarLot repo")
+				}
+			}
+		}
+		stage ('Test') {
+			steps {
+				def testFiles = findFiles(glob : 'test_*.py')
+				for (file in testFiles) {
+					sh "venv/bin/coverage run --omit */site-packages/*, */dist-packages/* ${file.path}"
+					echo "Testing of {file} is complete"
+				}
+				sh 'venv/bin/coverage report'
+			}
+		
+			post {
+                 		always {
+                      			script {
+                    				def test_reports_exist = fileExists('test-reports')
+                            			if (test_reports_exist) {
+                                			junit 'test-reports/*.xml'
+                            			}
+                            			def api_test_reports_exist = fileExists('api-test-reports')
+                            			if (api_test_reports_exist) {
+                                			junit 'api-test-reports/*.xml'
+                            			}
+                        		}
+				}
+			}
+		}
 	}
-}
+}           
