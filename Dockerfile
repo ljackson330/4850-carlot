@@ -16,4 +16,4 @@ COPY . /app
 RUN cd /app && python3 create_tables.py
 
 ENTRYPOINT [ "python3" ]
-CMD [ "points_api.py" ]
+CMD [ "car_api.py" ]
