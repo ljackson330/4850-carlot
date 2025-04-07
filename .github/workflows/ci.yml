@@ -14,33 +14,51 @@ jobs:
         with:
           python-version: '3.10'
           
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements.txt') }}
+          
       - name: Create venv and install deps
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           python -m venv venv
           venv/bin/pip install -r requirements.txt
           venv/bin/pip install pylint coverage
       
-      - name: Upload build artifacts
+      # Upload just the source code, not the venv
+      - name: Upload source code
         uses: actions/upload-artifact@v4
         with:
-          name: build-env
+          name: source-code
           path: |
-            venv/
-            requirements.txt
             *.py
+            requirements.txt
   
   lint:
     name: Lint
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Download build artifacts
+      - name: Download source code
         uses: actions/download-artifact@v4
         with:
-          name: build-env
+          name: source-code
       
-      - name: Fix venv permissions
-        run: chmod -R 755 venv/bin
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          
+      - name: Restore cached dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements.txt') }}
       
       - name: Run Pylint
         run: |
@@ -52,13 +70,22 @@ jobs:
     runs-on: ubuntu-latest
     needs: lint
     steps:
-      - name: Download build artifacts
+      - name: Download source code
         uses: actions/download-artifact@v4
         with:
-          name: build-env
+          name: source-code
       
-      - name: Fix venv permissions
-        run: chmod -R 755 venv/bin
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          
+      - name: Restore cached dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements.txt') }}
       
       - name: Create test directories
         run: |
@@ -74,22 +101,27 @@ jobs:
           
           # Generate coverage report
           venv/bin/coverage report
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            test-reports/
+            api-test-reports/
   
   zip:
     name: Zip
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - name: Download build artifacts
+      - name: Download source code
         uses: actions/download-artifact@v4
         with:
-          name: build-env
-          path: source
+          name: source-code
       
       - name: Create zip file
-        run: |
-          cd source
-          zip -r ../app.zip *.py
+        run: zip -r app.zip *.py
       
       - name: Upload zip artifact
         uses: actions/upload-artifact@v4
