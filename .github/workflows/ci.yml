@@ -106,12 +106,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
-      - name: Create zip file
-        run: zip -r app.zip *.py
-      
-      - name: Upload zip artifact
+                
+      - name: Upload source code
         uses: actions/upload-artifact@v4
         with:
           name: carlot-build
-          path: app.zip
+          path: |
+            **/*.py
