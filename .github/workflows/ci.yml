@@ -1,8 +1,7 @@
 name: Carlot CI
 on:
   push:
-env:
-  PYTHON_VERSION: '3.x'
+
 jobs:
   build:
     name: Build
@@ -13,8 +12,9 @@ jobs:
       
       - name: Set up Python
         uses: actions/setup-python@v5
-        # Using latest stable Python by default
-        
+        with:
+          python-version-file: '.python-version'
+          
       - name: Cache Python dependencies
         uses: actions/cache@v3
         id: cache
@@ -40,7 +40,8 @@ jobs:
       
       - name: Set up Python
         uses: actions/setup-python@v5
-        # Using latest stable Python by default
+        with:
+          python-version-file: '.python-version'
           
       - name: Restore cached dependencies
         uses: actions/cache@v3
@@ -64,7 +65,8 @@ jobs:
       
       - name: Set up Python
         uses: actions/setup-python@v5
-        # Using latest stable Python by default
+        with:
+          python-version-file: '.python-version'
           
       - name: Restore cached dependencies
         uses: actions/cache@v3
