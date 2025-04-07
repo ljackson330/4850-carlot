@@ -1,6 +1,8 @@
 name: Carlot CI
 on:
   push:
+env:
+  PYTHON_VERSION: '3.x'
 jobs:
   build:
     name: Build
