@@ -11,9 +11,8 @@ jobs:
       
       - name: Set up Python
         uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-          
+        # Using latest stable Python by default
+        
       - name: Cache Python dependencies
         uses: actions/cache@v3
         id: cache
@@ -28,30 +27,18 @@ jobs:
           python -m venv venv
           venv/bin/pip install -r requirements.txt
           venv/bin/pip install pylint coverage
-      
-      # Upload just the source code, not the venv
-      - name: Upload source code
-        uses: actions/upload-artifact@v4
-        with:
-          name: source-code
-          path: |
-            *.py
-            requirements.txt
   
   lint:
     name: Lint
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Download source code
-        uses: actions/download-artifact@v4
-        with:
-          name: source-code
+      - name: Checkout code
+        uses: actions/checkout@v4
       
       - name: Set up Python
         uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
+        # Using latest stable Python by default
           
       - name: Restore cached dependencies
         uses: actions/cache@v3
@@ -70,15 +57,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: lint
     steps:
-      - name: Download source code
-        uses: actions/download-artifact@v4
-        with:
-          name: source-code
+      - name: Checkout code
+        uses: actions/checkout@v4
       
       - name: Set up Python
         uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
+        # Using latest stable Python by default
           
       - name: Restore cached dependencies
         uses: actions/cache@v3
@@ -103,6 +87,7 @@ jobs:
           venv/bin/coverage report
       
       - name: Upload test results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
@@ -115,10 +100,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - name: Download source code
-        uses: actions/download-artifact@v4
-        with:
-          name: source-code
+      - name: Checkout code
+        uses: actions/checkout@v4
       
       - name: Create zip file
         run: zip -r app.zip *.py
