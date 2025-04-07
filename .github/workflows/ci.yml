@@ -1,0 +1,85 @@
+name: Carlot CI
+
+on:
+  push:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Create venv and install deps
+        run: |
+          python -m venv venv
+          venv/bin/pip install -r requirements.txt
+          venv/bin/pip install pylint coverage
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-env
+          path: |
+            venv
+            .  # Includes source code
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-env
+
+      - name: Run Pylint
+        run: |
+          find . -name "*.py" -not -path "./venv/*" > pylint_files.txt
+          ./venv/bin/pylint --fail-under=5 $(cat pylint_files.txt)
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-env
+
+      - name: Run Tests with Coverage
+        run: |
+          ./venv/bin/coverage run --omit */site-packages/*,*/dist-packages/* -m unittest discover
+          ./venv/bin/coverage report
+
+  zip:
+    name: Zip
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-env
+
+      - name: Create zip file
+        run: zip -r app.zip *.py
+
+      - name: Upload zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: carlot-build
+          path: app.zip
+
