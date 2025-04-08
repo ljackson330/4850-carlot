@@ -7,16 +7,18 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
+      # Pull the code from the GitHub repo
       - name: Checkout code
-        uses: actions/checkout
-      
+        uses: actions/checkout@v4
+      # Install Python on the runner
       - name: Set up Python
-        uses: actions/setup-python
+        uses: actions/setup-python@v5
         with:
+          # Version is specified in this file
           python-version-file: '.python-version'
-          
+      # Cache the Python build environment    
       - name: Cache Python dependencies
-        uses: actions/cache
+        uses: actions/cache@v4
         id: cache
         with:
           path: |
@@ -36,15 +38,15 @@ jobs:
     needs: build
     steps:
       - name: Checkout code
-        uses: actions/checkout
+        uses: actions/checkout@v4
       
       - name: Set up Python
-        uses: actions/setup-python
+        uses: actions/setup-python@v5
         with:
           python-version-file: '.python-version'
           
       - name: Restore cached dependencies
-        uses: actions/cache
+        uses: actions/cache@v4
         with:
           path: |
             venv
@@ -61,15 +63,15 @@ jobs:
     needs: lint
     steps:
       - name: Checkout code
-        uses: actions/checkout
+        uses: actions/checkout@v4
       
       - name: Set up Python
-        uses: actions/setup-python
+        uses: actions/setup-python@v5
         with:
           python-version-file: '.python-version'
           
       - name: Restore cached dependencies
-        uses: actions/cache
+        uses: actions/cache@v4
         with:
           path: |
             venv
@@ -105,10 +107,10 @@ jobs:
     needs: test
     steps:
       - name: Checkout code
-        uses: actions/checkout
+        uses: actions/checkout@v4
                 
       - name: Upload source code
-        uses: actions/upload-artifact
+        uses: actions/upload-artifact@v4
         with:
           name: carlot-build
           path: |
