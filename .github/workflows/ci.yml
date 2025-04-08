@@ -10,23 +10,15 @@ jobs:
       # Pull the code from the GitHub repo
       - name: Checkout code
         uses: actions/checkout@v4
-      # Install Python on the runner
+      # Install Python on the runner and enable caching of pip dependencies
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          # Version is specified in this file
           python-version-file: '.python-version'
-      # Cache the Python build environment    
-      - name: Cache Python dependencies
-        uses: actions/cache@v4
-        id: cache
-        with:
-          path: |
-            venv
-          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements.txt') }}
-          
+          cache: 'pip'  # Enable pip dependency caching automatically
+      
+      # Create venv and install deps
       - name: Create venv and install deps
-        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           python -m venv venv
           venv/bin/pip install -r requirements.txt
@@ -44,13 +36,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version-file: '.python-version'
-          
-      - name: Restore cached dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            venv
-          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements.txt') }}
+          cache: 'pip'  # Enable pip dependency caching automatically
       
       - name: Run Pylint
         run: |
@@ -69,13 +55,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version-file: '.python-version'
-          
-      - name: Restore cached dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            venv
-          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements.txt') }}
+          cache: 'pip'  # Enable pip dependency caching automatically
       
       - name: Create test directories
         run: |
