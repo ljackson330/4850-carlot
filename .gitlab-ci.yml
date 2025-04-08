@@ -1,0 +1,43 @@
+include:
+  - project: 'prototypes/ci_functions'
+    ref: master
+    file: 'python-pipeline-template.yml'
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
+  PROJECT_NAME: "carlot"
+ 
+cache:
+   paths:
+     - .pip-cache/
+     - venv/
+
+stages:
+  - setup
+  - build
+  - lint
+  - test
+  - zip
+  - package
+  - deliver
+
+setup:
+  extends: .setup
+
+build:
+  extends: .build
+
+lint:
+  extends: .lint
+
+test:
+  extends: .test
+
+zip:
+  extends: .zip
+
+package:
+  extends: .package
+
+deliver:
+  extends: .deliver
