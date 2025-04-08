@@ -21,10 +21,13 @@ jobs:
         uses: actions/cache@v4
         id: cache
         with:
+          # Cache ./venv and name it os-venv-{requirements.txt hash}
+          # This makes it so we use the same venv so long as requirements.txt doesn't change
           path: |
             venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements.txt') }}
-          
+
+      # Build new venv if the cache misses (if there's not a venv already built for this requirements.txt)    
       - name: Create venv and install deps
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
@@ -44,7 +47,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version-file: '.python-version'
-          
+
+      # Use the cached venv    
       - name: Restore cached dependencies
         uses: actions/cache@v4
         with:
@@ -84,7 +88,6 @@ jobs:
       
       - name: Run Tests with Coverage
         run: |
-          # Find and run test files
           for file in $(find . -name "test_*.py" -not -path "./venv/*"); do
             venv/bin/coverage run --append --omit "*/site-packages/*,*/dist-packages/*,venv/*" "$file"
           done
@@ -93,6 +96,7 @@ jobs:
           venv/bin/coverage report
       
       - name: Upload test results
+        # Run even when tests fail
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -100,7 +104,7 @@ jobs:
           path: |
             test-reports/
             api-test-reports/
-  
+             
   zip:
     name: Zip
     runs-on: ubuntu-latest
